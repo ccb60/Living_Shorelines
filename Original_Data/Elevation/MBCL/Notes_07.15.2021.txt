@@ -1,0 +1,8 @@
+UTM/WGS84/UTMZone19
+Metric
+Angle: Decimal degrees
+LL:  Decimal degrees
+Zero azimuth:  North
+
+Rod:  Parker Caswell
+TS:  Matt Craig

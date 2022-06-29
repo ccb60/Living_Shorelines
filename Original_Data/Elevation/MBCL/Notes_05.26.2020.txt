@@ -1,0 +1,12 @@
+Date:  5/26/20
+Location:  Maquoit Bay Conservation Lands, Brunswick
+Equipment:  CBEP's Leica TS-07 Total Station
+Personnel:  Matt Craig (total station) and Curtis Bohlen (rod), Casco Bay Estuary Partnership
+
+Purpose:  Pre-project baseline data for living shorelines pilot project.
+
+Four cross section transects were established, A, B, C, D.  A was southernmost, toward tidal creek, and D the northernmost, toward the trail end and overlook.
+
+Note:  It was the first time we used the total station and we did not fully understand operation. Data were collected without a full resection process therefore we did not sufficiently tie into the ground control points. Last two points of data set (45 and 46) are MBCLBM02 and MBCLBM03, respectively.
+
+It may be possible to correct the XYZ for this data set by correcting points 45 and 46 to the data for these control stations collected by MGS. 

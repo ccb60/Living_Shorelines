@@ -1,0 +1,5 @@
+7/20/2020 post-construction monitoring data at Wharton Point living shorelines pilot project.
+Equipment:  CBEP total station, Leica TS-07
+Observers:  Matt Craig (TS), Curtis Bohlen (rod)
+
+Tied into NAVD88 using control stations established by Pete Slovinsky of MGS using RTK and standard protocols for control stations. 

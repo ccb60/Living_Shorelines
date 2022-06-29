@@ -1,0 +1,9 @@
+Data collected by Charlotte Nutt, intern with Maine Geological Survey, using MGS RTK GPS unit under direction of CBEP staff Bohlen & Craig.
+
+Data provided to Craig by Nutt via email on 5/22/2020. 
+
+Transects are partial only, as follows:
+
+- Transects were stopped mid-way toward the upland, due to poor cell and satelite signals approaching the canopy. 
+
+- Transects were limited in their lower extent due to incoming tide.
