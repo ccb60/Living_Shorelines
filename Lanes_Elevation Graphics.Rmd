@@ -1,0 +1,153 @@
+---
+title: "Lanes Island Living Shorelines Elevations, 2021"
+author: "Curtis C. Bohlen"
+date: '2022-06-28'
+output: slidy_presentation 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, include = FALSE,
+                      fig.align = 'center',
+                      collapse = TRUE, comment = "#>")
+```
+
+# Libraries Used
+```{r include = TRUE, echo = TRUE, message = FALSE}
+library(tidyverse)
+library(readr)
+library(plotly)
+```
+
+
+```{r}
+theme_set(theme_minimal())
+```
+
+``
+
+# Generating Static Output
+The `save_image()` function has external dependencies on the `kaleido` python
+package, the `plotly` **python** package and on the `reticulate` R package.  I
+had to figure out which python installation R was calling, and then install
+`kaleido` and `plotly` via conda in the relevant anaconda environment.
+
+
+# Load Data
+First, we read in data related to setting up the Total Station.
+```{r include = TRUE, echo = TRUE, warning = TRUE}
+the_data_setup<- read_csv("2021.TXT", col_names = FALSE, 
+                          col_types = "idddcc", n_max = 6)
+```
+
+The `read_csv()` function determines the number of data columns based on the
+first few rows of data. I could not find a way to get it to recognize the sixth
+```{r  include = TRUE, echo = TRUE}
+problems(the_data_setup)
+```
+
+Then we read in the rest of the data. Unfortunately, the number of rows to skip 
+is file-specific, so probably needs to be based on visual inspection of each 
+file.
+
+```{r include = TRUE, echo = TRUE}
+the_data <- read_csv("2021.TXT", skip = 7,
+                     col_names = FALSE, 
+                     col_types = "idddccccccc")
+
+names(the_data ) <- c("Index", "Easting", "Northing", "Elevation", "Name", 
+                      "Date", "Time", "Inst_Hgt", "Rod_Hgt", "PRSMBS", "PRSMFS")
+
+the_data <- the_data %>%
+  mutate(Date = sub("DATE:", "", Date),
+         Time = sub("TIME:", "", Time),
+         Inst_Hgt  = as.numeric(sub("INSTHGT:", "", Inst_Hgt)),
+         Rod_Hgt  = as.numeric(sub("RODHGT:", "", Inst_Hgt)),
+         PRSMBS  = as.numeric(sub("PRSMBS:", "", PRSMBS)),
+         PRSMFS  = as.numeric(sub("PRSMFS:", "", PRSMFS))
+         ) %>%
+  mutate(Date = as.Date(Date, format = '%m-%d-%Y'),
+         Time = strptime(Time, format = '%H:%M:%S', tz = "America/New_York"))
+```
+
+#  More Data Manipulation
+We need to create some different data columns to simplify plotting.
+
+```{r include = TRUE, echo = TRUE}
+the_data <- the_data %>%
+  mutate(group = if_else(grepl('CROSS', Name), 'Cross Sections',
+                         if_else(grepl('SCARP', Name), "Scarp",
+                                 if_else(grepl('LOG', Name), 'Structure', 
+                                         'Other')))) %>%
+  mutate(group = if_else(group == 'Scarp' & Elevation < 3, "Toe", group)) %>%
+  mutate(ShortName = Name,
+         ShortName = sub('LOG', '', ShortName),
+         ShortName = sub("CROSS#", '', ShortName),
+         x = Easting - 4849200,
+         y = Northing - 409000
+
+)
+```
+
+
+# First Effort at Plotly
+```{r include = TRUE, warning = TRUE}
+fig <- the_data %>%
+  filter(group == 'Cross Sections') %>%
+  group_by(ShortName) %>%
+  plot_ly(x = ~x, y = ~y, z = ~Elevation,  color=~Elevation,
+                 type = 'scatter3d', mode = 'markers',
+          marker = list(size = 5)) %>%
+  add_paths(x = ~x, y = ~y, z = ~Elevation, color = ~Elevation,
+            showlegend = FALSE, mode = 'paths')
+fig
+```
+```{r fig_1, include = TRUE}
+fig <- fig %>%
+   layout(scene = list(camera = list(eye = list(x=-1, y =2, z =0.5)),
+          aspectmode='data'))
+fig
+```
+
+
+# Add The Structure (Logs)
+```{r fig_2, include = TRUE}
+tmp <- the_data %>% 
+  filter(group == 'Structure') %>%
+  mutate(grp = substr(ShortName, 1,1)) %>%
+  group_by(grp)
+
+fig_2  <- fig %>%
+  add_paths(x = ~x, y = ~y, z = ~Elevation, color = I('Gray15'),
+          line = list(width = 6), data = tmp,
+          showlegend = FALSE)
+  
+fig_2
+```
+
+
+# Add The Scarp Lines
+```{r fig_3, include = TRUE}
+top <- the_data %>% 
+  filter(group == 'Scarp')
+bottom <- the_data %>% 
+  filter(group == 'Toe')
+
+fig_3  <- fig_2 %>%
+  add_markers(x = ~x, y = ~y, z = ~Elevation, color = I('Gray50'), data = top,
+              marker = list(size = 5),
+              showlegend = FALSE ) %>%
+  add_paths(x = ~x, y = ~y, z = ~Elevation, color = I('Gray50'), data = top ,
+            showlegend = FALSE) %>%
+    add_markers(x = ~x, y = ~y, z = ~Elevation, color = I('blue'), data = bottom,
+              marker = list(size = 5),
+              showlegend = FALSE ) %>%
+  add_paths(x = ~x, y = ~y, z = ~Elevation, color = I('blue'), data = bottom ,
+            showlegend = FALSE)
+  
+fig_3
+```
+
+```{r include = TRUE, echo = TRUE}
+save_image(fig_3, file = 'test.png')
+```
+
